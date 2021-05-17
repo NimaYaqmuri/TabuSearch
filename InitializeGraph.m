@@ -1,5 +1,5 @@
 % Initial Grapth
-westernSahra;
+graph;
 
 % Number of Cities
 n = size(cities, 1);

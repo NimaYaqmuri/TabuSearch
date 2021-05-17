@@ -5,7 +5,7 @@ close all;
 %% Initialization
 
 % Initializate Necessary Variables
-Initialize;
+InitializeGraph;
 
 % Evaluation Function
 CalcCost = @(perm) EvaluationFunction(perm, coords);    
@@ -19,7 +19,7 @@ nAction = numel(actionList);
 %% Tabu Search Parameters
 
 % Maximum Number of Iterations
-MaxIt = 5000;
+MaxIt = 100;
 
 % Initialize Action Tabu Counters
 TC = zeros(nAction, 1);
@@ -31,8 +31,7 @@ TL = round(0.1 * nAction);
 bestEver.permutation = randperm(n);
 bestEver.cost = CalcCost(bestEver.permutation);
 
-best.permutation = bestEver.permutation;
-best.cost = bestEver.cost;
+best = bestEver;
 
 % Variables needed for Random Restart Algorithm
 cnt = 0;
@@ -53,26 +52,20 @@ for it = 1:MaxIt
         tmp.cost = CalcCost(tmp.permutation);
         tmp.actionIndex = i;
         
-        if TC(i) <= it + TL
+        if TC(i) <= it % this move is not tabu
             if tmp.cost < newBest.cost
                 newBest = tmp;
             end
-        else
+        else % Aspiration Criteria
             if tmp.cost < bestEver.cost
-                newBest.cost = tmp;
+                newBest = tmp;
             end
         end
     end
     
     % Update Tabu List
-    for i = 1:nAction
-        if i == newBest.actionIndex
-            %  Add To Tabu List
-            TC(i) = it + TL;
-            break;
-        end
-    end
-    
+    TC(newBest.actionIndex) = it + TL;
+
     % Update Best Solution Ever Found
     if newBest.cost < best.cost
         best = newBest;
@@ -106,8 +99,6 @@ for it = 1:MaxIt
     pause(0.01);
     
 end
-
-bestCost = bestCost(1 : it);
 
 %% Results
 
